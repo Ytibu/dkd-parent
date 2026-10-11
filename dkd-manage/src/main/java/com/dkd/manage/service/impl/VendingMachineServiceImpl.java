@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.dkd.common.constant.DkdContants;
+import com.dkd.common.exception.ServiceException;
 import com.dkd.common.utils.DateUtils;
+import com.dkd.common.utils.MessageUtils;
 import com.dkd.common.utils.uuid.UUIDUtils;
 import com.dkd.manage.domain.Channel;
 import com.dkd.manage.domain.Node;
@@ -106,7 +108,10 @@ public class VendingMachineServiceImpl implements IVendingMachineService
             }
         }
 
-        channelService.bathInsertChannels(channelList);
+        int i = channelService.bathInsertChannels(channelList);
+        if (i <= 0){
+            throw new ServiceException("批量插入数据失败");
+        }
         return result;
 
     }

@@ -18,6 +18,8 @@ import com.dkd.common.exception.DemoModeException;
 import com.dkd.common.exception.ServiceException;
 import com.dkd.common.utils.StringUtils;
 
+import java.util.Objects;
+
 /**
  * 全局异常处理器
  * 
@@ -144,8 +146,11 @@ public class GlobalExceptionHandler
     public AjaxResult handleDataIntegrityViolationException(DataIntegrityViolationException e)
     {
         log.error(e.getMessage(), e);
-        if (e.getMessage().contains("foreign")){
+        if (Objects.requireNonNull(e.getMessage()).contains("foreign")){
             return AjaxResult.error("无法删除，其他数据依赖该数据");
+        }
+        if(e.getMessage().contains("Duplicate")){
+            return AjaxResult.error("无法保存，已经存在该数据");
         }
         return AjaxResult.error("数据完整性异常，联系管理员处理");
     }

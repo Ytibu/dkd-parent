@@ -24,6 +24,8 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletResponse;
+
+import com.alibaba.excel.EasyExcel;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.RegExUtils;
 import org.apache.commons.lang3.reflect.FieldUtils;
@@ -1792,5 +1794,31 @@ public class ExcelUtil<T>
             log.error("获取对象异常{}", e.getMessage());
         }
         return method;
+    }
+
+    /**
+     * 对excel表单默认第一个索引名转换成list
+     * @param is 输入流
+     * @return 转换后集合
+     * @throws Exception 异常
+     */
+    public List<T> importEasyExcel(InputStream is) throws Exception
+    {
+        return EasyExcel.read(is).head(clazz).sheet().doReadSync();
+    }
+
+    /**
+     * 对list数据源将其中的数据导入到excel表单中
+     * @param response 响应
+     * @param list 导出数据集合
+     * @param sheetName 工作表名
+     */
+    public void exportEasyExcel(HttpServletResponse response, List<T> list, String sheetName)
+    {
+        try {
+            EasyExcel.write(response.getOutputStream(), clazz).sheet(sheetName).doWrite(list);
+        }catch (Exception e) {
+            log.error("导出EasyExcel异常{}", e.getMessage());
+        }
     }
 }

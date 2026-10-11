@@ -2,6 +2,10 @@ package com.dkd.manage.controller;
 
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
+
+import com.dkd.manage.domain.dto.ChannelConfigDTO;
+import com.dkd.manage.domain.vo.ChannelVO;
+import io.netty.channel.ChannelConfig;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -100,5 +104,24 @@ public class ChannelController extends BaseController
     public AjaxResult remove(@PathVariable Long[] ids)
     {
         return toAjax(channelService.deleteChannelByIds(ids));
+    }
+
+    /**
+     * 根据货道编号查询货道列表
+     */
+    @PreAuthorize("@ss.hasPermi('manage:channel:list')")
+    @GetMapping("/list/{innerCode}")
+    public AjaxResult listByInnerCode(@PathVariable String innerCode)
+    {
+        List<ChannelVO> channelVOList = channelService.selectChannelVOListByInnerCode(innerCode);
+        return success(channelVOList);
+    }
+
+    @PreAuthorize("@ss.hasAnyPermi('manage:channel:edit')")
+    @Log(title = "售货机货道", businessType = BusinessType.UPDATE)
+    @PutMapping("/config")
+    public AjaxResult setChannel(@RequestBody ChannelConfigDTO channelConfigDTO)
+    {
+        return toAjax(channelService.setChannel(channelConfigDTO));
     }
 }
