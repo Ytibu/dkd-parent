@@ -2,6 +2,11 @@ package com.dkd.manage.controller;
 
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
+
+import com.dkd.common.constant.DkdContants;
+import com.dkd.manage.domain.VendingMachine;
+import com.dkd.manage.service.IVendingMachineService;
+import com.dkd.manage.service.impl.VendingMachineServiceImpl;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -33,6 +38,8 @@ public class EmpController extends BaseController
 {
     @Autowired
     private IEmpService empService;
+    @Autowired
+    private IVendingMachineService vendingMachineService;
 
     /**
      * 查询人员列表列表
@@ -100,5 +107,42 @@ public class EmpController extends BaseController
     public AjaxResult remove(@PathVariable Long[] ids)
     {
         return toAjax(empService.deleteEmpByIds(ids));
+    }
+
+    /**
+     * 根据设备信息获取运行人员列表
+     */
+    @PreAuthorize("@ss.hasPermi('manage:emp:list')")
+    @GetMapping("/businessList/{innerCode}")
+    public AjaxResult businessList(@PathVariable String innerCode)
+    {
+        VendingMachine vendingMachine = vendingMachineService.selectVendingMachineByInnerCode(innerCode);
+        if(vendingMachine == null){
+            return error("售货机不存在");
+        }
+        Emp emp = new Emp();
+        emp.setRegionId(vendingMachine.getRegionId());
+        emp.setRoleCode(DkdContants.ROLE_CODE_BUSINESS);
+        emp.setStatus(DkdContants.EMP_STATUS_NORMAL);
+        return success(empService.selectEmpList(emp));
+    }
+
+    /**
+     * 售货机编号获取运维人员列表
+     */
+    @PreAuthorize("@ss.hasPermi('manage:emp:list')")
+    @GetMapping("/operationList/{innerCode}")
+    public AjaxResult operationList(@PathVariable String innerCode)
+    {
+        VendingMachine vendingMachine = vendingMachineService.selectVendingMachineByInnerCode(innerCode);
+        if(vendingMachine == null){
+            return error("售货机不存在");
+        }
+        Emp emp = new Emp();
+        emp.setRegionId(vendingMachine.getRegionId());
+        emp.setRoleCode(DkdContants.ROLE_CODE_OPERATOR);
+        emp.setStatus(DkdContants.EMP_STATUS_NORMAL);
+
+        return success(empService.selectEmpList(emp));
     }
 }
